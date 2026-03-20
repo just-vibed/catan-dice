@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="90" fill="#2D5A27"/>
+  <!-- Die 1 (white) -->
+  <rect x="55" y="140" width="190" height="190" rx="30" fill="white"/>
+  <!-- Face 5: all corners + center -->
+  <circle cx="110" cy="195" r="22" fill="#222"/>
+  <circle cx="190" cy="195" r="22" fill="#222"/>
+  <circle cx="150" cy="235" r="22" fill="#222"/>
+  <circle cx="110" cy="275" r="22" fill="#222"/>
+  <circle cx="190" cy="275" r="22" fill="#222"/>
+  <!-- Die 2 (tan) -->
+  <rect x="267" y="182" width="190" height="190" rx="30" fill="#C8A96E"/>
+  <!-- Face 4: all corners -->
+  <circle cx="322" cy="237" r="22" fill="#2D5A27"/>
+  <circle cx="402" cy="237" r="22" fill="#2D5A27"/>
+  <circle cx="322" cy="317" r="22" fill="#2D5A27"/>
+  <circle cx="402" cy="317" r="22" fill="#2D5A27"/>
+</svg>
