@@ -85,10 +85,24 @@ function shuffle(arr) {
 }
 
 function tilesValid(tiles) {
-  // No two adjacent tiles share the same resource
-  for (let i = 0; i < 19; i++) {
-    for (const j of ADJACENCY[i]) {
-      if (tiles[i] === tiles[j]) return false;
+  // No cluster of same-resource tiles larger than 2
+  const visited = new Array(19).fill(false);
+  for (let start = 0; start < 19; start++) {
+    if (visited[start]) continue;
+    const resource = tiles[start];
+    const queue = [start];
+    visited[start] = true;
+    let size = 0;
+    while (queue.length) {
+      const curr = queue.shift();
+      size++;
+      if (size > 2) return false;
+      for (const j of ADJACENCY[curr]) {
+        if (!visited[j] && tiles[j] === resource) {
+          visited[j] = true;
+          queue.push(j);
+        }
+      }
     }
   }
   return true;
