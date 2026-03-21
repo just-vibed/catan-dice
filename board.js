@@ -161,21 +161,37 @@ function numbersBalanced(tiles, numbers) {
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let balancedSpread = true;
+let balancedSpread  = true;
+let desertCenter    = false;
 
 // ── Board generation ──────────────────────────────────────────────────────────
 function generateBoard() {
-  // Step 1: shuffle resources until no two adjacent tiles share a type
-  let tiles, attempts;
-  attempts = 0;
-  do {
-    tiles = shuffle(RESOURCES);
-    attempts++;
-  } while (!tilesValid(tiles) && attempts < 1000);
+  let tiles, numbers, attempts;
 
-  // Step 2: shuffle numbers until constraints are met
+  // Step 1: place resources
+  // When desertCenter is on, tile 9 is locked to desert and the 18 other
+  // resources are shuffled across the remaining positions.
+  attempts = 0;
+  if (desertCenter) {
+    const others = RESOURCES.filter(r => r !== 'desert'); // 18 non-desert tiles
+    do {
+      const shuffled = shuffle(others);
+      tiles = Array.from({ length: 19 }, (_, i) => {
+        if (i === 9) return 'desert';
+        return shuffled[i < 9 ? i : i - 1]; // skip slot 9
+      });
+      attempts++;
+    } while (!tilesValid(tiles) && attempts < 1000);
+  } else {
+    do {
+      tiles = shuffle(RESOURCES);
+      attempts++;
+    } while (!tilesValid(tiles) && attempts < 1000);
+  }
+
+  // Step 2: shuffle numbers until constraints are met.
+  // With desertCenter all 18 NUMBERS fill all 18 non-centre tiles — no wasted slot.
   const nonDesert = tiles.reduce((acc, t, i) => t !== 'desert' ? [...acc, i] : acc, []);
-  let numbers;
   attempts = 0;
   do {
     const nums = shuffle(NUMBERS);
@@ -375,7 +391,26 @@ document.getElementById('randomize-btn').addEventListener('click', () => {
 
 document.getElementById('balanced-toggle').addEventListener('change', e => {
   balancedSpread = e.target.checked;
+  localStorage.setItem('balancedSpread', balancedSpread);
 });
+
+document.getElementById('desert-center-toggle').addEventListener('change', e => {
+  desertCenter = e.target.checked;
+  localStorage.setItem('desertCenter', desertCenter);
+  renderBoard(generateBoard());
+});
+
+// Restore saved toggle states
+const savedBalanced = localStorage.getItem('balancedSpread');
+if (savedBalanced !== null) {
+  balancedSpread = savedBalanced === 'true';
+  document.getElementById('balanced-toggle').checked = balancedSpread;
+}
+const savedDesertCenter = localStorage.getItem('desertCenter');
+if (savedDesertCenter !== null) {
+  desertCenter = savedDesertCenter === 'true';
+  document.getElementById('desert-center-toggle').checked = desertCenter;
+}
 
 applyTheme(localStorage.getItem('theme') || 'dark');
 renderBoard(generateBoard());
