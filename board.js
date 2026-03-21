@@ -146,6 +146,23 @@ function numbersValid(numbers) {
   return true;
 }
 
+function numbersBalanced(tiles, numbers) {
+  // Each resource type gets at most one red number (6 or 8)
+  const red = [6, 8];
+  const redPerResource = {};
+  for (let i = 0; i < 19; i++) {
+    if (red.includes(numbers[i])) {
+      const res = tiles[i];
+      redPerResource[res] = (redPerResource[res] || 0) + 1;
+      if (redPerResource[res] > 1) return false;
+    }
+  }
+  return true;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let balancedSpread = true;
+
 // ── Board generation ──────────────────────────────────────────────────────────
 function generateBoard() {
   // Step 1: shuffle resources until no two adjacent tiles share a type
@@ -156,7 +173,7 @@ function generateBoard() {
     attempts++;
   } while (!tilesValid(tiles) && attempts < 1000);
 
-  // Step 2: shuffle numbers until no two adjacent reds (6/8)
+  // Step 2: shuffle numbers until constraints are met
   const nonDesert = tiles.reduce((acc, t, i) => t !== 'desert' ? [...acc, i] : acc, []);
   let numbers;
   attempts = 0;
@@ -165,7 +182,10 @@ function generateBoard() {
     numbers = new Array(19).fill(null);
     nonDesert.forEach((idx, i) => numbers[idx] = nums[i]);
     attempts++;
-  } while (!numbersValid(numbers) && attempts < 500);
+  } while (
+    (!numbersValid(numbers) || (balancedSpread && !numbersBalanced(tiles, numbers)))
+    && attempts < 1000
+  );
 
   return { tiles, numbers };
 }
@@ -312,6 +332,10 @@ document.getElementById('randomize-btn').addEventListener('click', () => {
       svg.style.transform  = 'scale(1)';
     }));
   }, 185);
+});
+
+document.getElementById('balanced-toggle').addEventListener('change', e => {
+  balancedSpread = e.target.checked;
 });
 
 applyTheme(localStorage.getItem('theme') || 'dark');

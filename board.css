@@ -41,6 +41,33 @@
   transform-origin: center center;
 }
 
+/* Board options bar */
+#board-options {
+  display: flex;
+  justify-content: center;
+  padding: 4px 16px 2px;
+  flex-shrink: 0;
+}
+
+.board-option-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--hint-color);
+  cursor: pointer;
+  user-select: none;
+}
+
+.board-option-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Legend */
 #board-legend {
   display: flex;
