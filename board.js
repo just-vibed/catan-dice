@@ -17,6 +17,31 @@ const TILE_CENTERS = (() => {
   return out;
 })();
 
+// ── Water ring (neighbours of the 19 board tiles that aren't on the board) ───
+const WATER_RING = (() => {
+  const dx = R * SQRT3;
+  const dy = R * 1.5;
+  const OFFSETS = [
+    [ dx,    0  ], [-dx,    0  ],
+    [ dx/2, -dy ], [-dx/2, -dy ],
+    [ dx/2,  dy ], [-dx/2,  dy ],
+  ];
+  const key     = (x, y) => `${Math.round(x)},${Math.round(y)}`;
+  const boardKeys = new Set(TILE_CENTERS.map(([x, y]) => key(x, y)));
+  const seen    = new Set();
+  const water   = [];
+  for (const [cx, cy] of TILE_CENTERS) {
+    for (const [ox, oy] of OFFSETS) {
+      const k = key(cx + ox, cy + oy);
+      if (!boardKeys.has(k) && !seen.has(k)) {
+        seen.add(k);
+        water.push([cx + ox, cy + oy]);
+      }
+    }
+  }
+  return water;
+})();
+
 // ── Adjacency list (shared-edge neighbours for all 19 tiles) ─────────────────
 const ADJACENCY = [
   [1, 3, 4],             // 0
@@ -174,6 +199,16 @@ function renderBoard({ tiles, numbers }) {
     </filter>`;
   svg.appendChild(defs);
 
+  // Water / ocean border
+  WATER_RING.forEach(([cx, cy]) => {
+    svg.appendChild(svgEl('polygon', {
+      points:         hexPoints(cx, cy),
+      fill:           '#1a6b9e',
+      stroke:         '#0e5079',
+      'stroke-width': '1.5',
+    }));
+  });
+
   TILE_CENTERS.forEach(([cx, cy], i) => {
     const resource = tiles[i];
     const number   = numbers[i];
@@ -263,7 +298,20 @@ themeBtnEl.addEventListener('click', () => {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.getElementById('randomize-btn').addEventListener('click', () => {
-  renderBoard(generateBoard());
+  const svg = document.getElementById('board-svg');
+  // Flip out
+  svg.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+  svg.style.opacity    = '0';
+  svg.style.transform  = 'scale(0.88)';
+  setTimeout(() => {
+    renderBoard(generateBoard());
+    // Two rAF frames so the browser paints the new tiles before transitioning in
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      svg.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+      svg.style.opacity    = '1';
+      svg.style.transform  = 'scale(1)';
+    }));
+  }, 185);
 });
 
 applyTheme(localStorage.getItem('theme') || 'dark');
