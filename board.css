@@ -41,6 +41,58 @@
   transform-origin: center center;
 }
 
+/* Pip totals */
+#pip-totals {
+  padding: 4px 16px 6px;
+  flex-shrink: 0;
+}
+
+.pip-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--hint-color);
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.pip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.pip-emoji {
+  font-size: 0.82rem;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pip-bar-wrap {
+  flex: 1;
+  height: 7px;
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pip-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.35s ease;
+}
+
+.pip-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--hint-color);
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
 /* Board options bar */
 #board-options {
   display: flex;

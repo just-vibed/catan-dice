@@ -42,6 +42,22 @@ const WATER_RING = (() => {
   return water;
 })();
 
+// ── Port candidates (water tiles + their adjacent board-tile neighbours) ──────
+const PORT_CANDIDATES = (() => {
+  const dx = R * SQRT3, dy = R * 1.5;
+  const OFFSETS = [[dx,0],[-dx,0],[dx/2,-dy],[-dx/2,-dy],[dx/2,dy],[-dx/2,dy]];
+  const key      = (x, y) => `${Math.round(x)},${Math.round(y)}`;
+  const boardMap = new Map(TILE_CENTERS.map(([x, y]) => [key(x, y), [x, y]]));
+  return WATER_RING.map(([wx, wy]) => {
+    const neighbors = [];
+    for (const [ox, oy] of OFFSETS) {
+      const k = key(wx + ox, wy + oy);
+      if (boardMap.has(k)) neighbors.push(boardMap.get(k));
+    }
+    return { water: [wx, wy], neighbors };
+  });
+})();
+
 // ── Adjacency list (shared-edge neighbours for all 19 tiles) ─────────────────
 const ADJACENCY = [
   [1, 3, 4],             // 0
@@ -160,6 +176,17 @@ function numbersBalanced(tiles, numbers) {
   return true;
 }
 
+// ── Port generation ───────────────────────────────────────────────────────────
+const PORT_TYPES = ['3:1','3:1','3:1','3:1','3:1','grain','wool','wood','brick','ore'];
+
+function generatePorts() {
+  const types   = shuffle(PORT_TYPES);
+  // Prefer water tiles touching 2 land tiles — these look like real Catan edge ports
+  const twoAdj  = shuffle(PORT_CANDIDATES.filter(p => p.neighbors.length >= 2));
+  const oneAdj  = shuffle(PORT_CANDIDATES.filter(p => p.neighbors.length === 1));
+  return [...twoAdj, ...oneAdj].slice(0, 9).map((pos, i) => ({ ...pos, type: types[i] }));
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let balancedSpread = true;
 
@@ -187,7 +214,8 @@ function generateBoard() {
     && attempts < 1000
   );
 
-  return { tiles, numbers };
+  const ports = generatePorts();
+  return { tiles, numbers, ports };
 }
 
 // ── SVG rendering ─────────────────────────────────────────────────────────────
@@ -207,7 +235,7 @@ function svgEl(tag, attrs, text) {
   return el;
 }
 
-function renderBoard({ tiles, numbers }) {
+function renderBoard({ tiles, numbers, ports }) {
   const svg = document.getElementById('board-svg');
   svg.innerHTML = '';
 
@@ -246,14 +274,24 @@ function renderBoard({ tiles, numbers }) {
       'stroke-width': '1.5',
     }));
 
-    // Resource emoji — above centre if has number, centred if desert
+    // Resource emoji — desert shifted up to leave room for robber
     g.appendChild(svgEl('text', {
       x:                  cx,
-      y:                  number ? cy - R * 0.14 : cy + R * 0.08,
+      y:                  resource === 'desert' ? cy - R * 0.12
+                          : number ? cy - R * 0.14 : cy + R * 0.08,
       'text-anchor':      'middle',
       'dominant-baseline':'middle',
       'font-size':        R * 0.36,
     }, RESOURCE_EMOJI[resource]));
+
+    // Robber marker on the desert tile
+    if (resource === 'desert') {
+      g.appendChild(svgEl('text', {
+        x: cx, y: cy + R * 0.38,
+        'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        'font-size': R * 0.3,
+      }, '🦹'));
+    }
 
     if (number) {
       const tokenR = R * 0.29;
@@ -300,6 +338,77 @@ function renderBoard({ tiles, numbers }) {
 
     svg.appendChild(g);
   });
+
+  // Ports — dock lines + badge rendered on top of water tiles
+  ports.forEach(({ water: [wx, wy], neighbors, type }) => {
+    const g  = svgEl('g', {});
+    const bR = R * 0.26;
+
+    // Dock lines pointing toward each adjacent land tile
+    for (const [lx, ly] of neighbors) {
+      g.appendChild(svgEl('line', {
+        x1: wx, y1: wy, x2: (wx + lx) / 2, y2: (wy + ly) / 2,
+        stroke: '#c8a96e', 'stroke-width': '4', 'stroke-linecap': 'round',
+      }));
+    }
+
+    // Badge circle
+    g.appendChild(svgEl('circle', {
+      cx: wx, cy: wy, r: bR,
+      fill: '#0a3d5c', stroke: '#c8a96e', 'stroke-width': '2',
+    }));
+
+    if (type === '3:1') {
+      g.appendChild(svgEl('text', {
+        x: wx, y: wy, 'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        'font-size': R * 0.15, 'font-weight': 'bold',
+        fill: '#c8a96e', 'font-family': 'system-ui, sans-serif',
+      }, '3:1'));
+    } else {
+      g.appendChild(svgEl('text', {
+        x: wx, y: wy - bR * 0.18,
+        'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        'font-size': R * 0.2,
+      }, RESOURCE_EMOJI[type]));
+      g.appendChild(svgEl('text', {
+        x: wx, y: wy + bR * 0.52,
+        'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        'font-size': R * 0.13, 'font-weight': 'bold',
+        fill: '#c8a96e', 'font-family': 'system-ui, sans-serif',
+      }, '2:1'));
+    }
+
+    svg.appendChild(g);
+  });
+
+  renderPipTotals(tiles, numbers);
+}
+
+// ── Pip totals ────────────────────────────────────────────────────────────────
+function renderPipTotals(tiles, numbers) {
+  const totals = {};
+  for (let i = 0; i < 19; i++) {
+    if (tiles[i] === 'desert') continue;
+    const res = tiles[i];
+    totals[res] = (totals[res] || 0) + (PROB_DOTS[numbers[i]] || 0);
+  }
+  const sorted  = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+  const maxPips = sorted[0]?.[1] || 1;
+
+  const el = document.getElementById('pip-totals');
+  el.innerHTML = '<div class="pip-label">Resource strength</div>';
+  for (const [res, pips] of sorted) {
+    const pct = (pips / maxPips * 100).toFixed(1);
+    const row = document.createElement('div');
+    row.className = 'pip-row';
+    row.innerHTML = `
+      <span class="pip-emoji">${RESOURCE_EMOJI[res]}</span>
+      <div class="pip-bar-wrap">
+        <div class="pip-bar" style="width:${pct}%;background:${RESOURCE_COLOR[res]}"></div>
+      </div>
+      <span class="pip-count">${pips}</span>`;
+    el.appendChild(row);
+  }
 }
 
 // ── Theme ─────────────────────────────────────────────────────────────────────

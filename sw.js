@@ -1,4 +1,4 @@
-const CACHE = 'catan-dice-v16';
+const CACHE = 'catan-dice-v17';
 const ASSETS = [
   './',
   './index.html',
