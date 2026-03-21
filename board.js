@@ -84,15 +84,7 @@ function shuffle(arr) {
   return a;
 }
 
-function isValid(tiles, numbers) {
-  // No two adjacent tiles share the same resource
-  for (let i = 0; i < 19; i++) {
-    for (const j of ADJACENCY[i]) {
-      if (tiles[i] === tiles[j]) return false;
-    }
-  }
-
-  // No two adjacent tiles share a red number (6 or 8)
+function isValid(numbers) {
   const red = [6, 8];
   for (let i = 0; i < 19; i++) {
     if (red.includes(numbers[i])) {
@@ -101,7 +93,6 @@ function isValid(tiles, numbers) {
       }
     }
   }
-
   return true;
 }
 
@@ -117,7 +108,7 @@ function generateBoard() {
     numbers = new Array(19).fill(null);
     nonDesert.forEach((idx, i) => numbers[idx] = nums[i]);
     attempts++;
-  } while (!isValid(tiles, numbers) && attempts < 2000);
+  } while (!isValid(numbers) && attempts < 500);
 
   return { tiles, numbers };
 }
