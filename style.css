@@ -67,6 +67,7 @@ body {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  padding-bottom: 58px; /* room for bottom nav */
 }
 
 /* Header */
@@ -601,4 +602,45 @@ header {
 
 .hidden {
   display: none !important;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--header-bg);
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  z-index: 50;
+  height: 58px;
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: var(--hint-color);
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+
+.nav-tab.active {
+  color: var(--accent);
+}
+
+.nav-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.nav-label {
+  text-transform: uppercase;
+  font-weight: 700;
 }

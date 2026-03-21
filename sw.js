@@ -1,4 +1,4 @@
-const CACHE = 'catan-dice-v11';
+const CACHE = 'catan-dice-v12';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,10 @@ const ASSETS = [
   './manifest.json',
   './icons/icon.svg',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './board.html',
+  './board.css',
+  './board.js',
 ];
 
 self.addEventListener('install', e => {
