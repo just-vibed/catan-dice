@@ -84,7 +84,18 @@ function shuffle(arr) {
   return a;
 }
 
-function isValid(numbers) {
+function tilesValid(tiles) {
+  // No two adjacent tiles share the same resource
+  for (let i = 0; i < 19; i++) {
+    for (const j of ADJACENCY[i]) {
+      if (tiles[i] === tiles[j]) return false;
+    }
+  }
+  return true;
+}
+
+function numbersValid(numbers) {
+  // No two adjacent tiles share a red number (6 or 8)
   const red = [6, 8];
   for (let i = 0; i < 19; i++) {
     if (red.includes(numbers[i])) {
@@ -98,17 +109,24 @@ function isValid(numbers) {
 
 // ── Board generation ──────────────────────────────────────────────────────────
 function generateBoard() {
-  let tiles, numbers;
-  let attempts = 0;
-
+  // Step 1: shuffle resources until no two adjacent tiles share a type
+  let tiles, attempts;
+  attempts = 0;
   do {
     tiles = shuffle(RESOURCES);
-    const nonDesert = tiles.reduce((acc, t, i) => t !== 'desert' ? [...acc, i] : acc, []);
+    attempts++;
+  } while (!tilesValid(tiles) && attempts < 1000);
+
+  // Step 2: shuffle numbers until no two adjacent reds (6/8)
+  const nonDesert = tiles.reduce((acc, t, i) => t !== 'desert' ? [...acc, i] : acc, []);
+  let numbers;
+  attempts = 0;
+  do {
     const nums = shuffle(NUMBERS);
     numbers = new Array(19).fill(null);
     nonDesert.forEach((idx, i) => numbers[idx] = nums[i]);
     attempts++;
-  } while (!isValid(numbers) && attempts < 500);
+  } while (!numbersValid(numbers) && attempts < 500);
 
   return { tiles, numbers };
 }
