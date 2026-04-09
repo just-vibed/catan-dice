@@ -367,7 +367,8 @@ function renderStats() {
     const isRobber = n === 7;
     const isHot = !isRobber && Math.abs(n - mean) <= range * 0.15;
     const cls = isRobber ? 'bar-robber' : isHot ? 'bar-hot' : 'bar-normal';
-    return `<div class="stat-col">
+    const label = count === 1 ? 'rolled 1 time' : `rolled ${count} times`;
+    return `<div class="stat-col" data-tooltip="${label}">
       <div class="stat-count">${count || ''}</div>
       <div class="stat-bar-wrap">
         <div class="stat-bar ${cls}" style="height:${pct}%"></div>
@@ -376,6 +377,14 @@ function renderStats() {
     </div>`;
   }).join('');
 }
+
+statsChartEl.addEventListener('click', e => {
+  const col = e.target.closest('.stat-col');
+  if (!col) return;
+  const isActive = col.classList.contains('active');
+  document.querySelectorAll('.stat-col.active').forEach(el => el.classList.remove('active'));
+  if (!isActive) col.classList.add('active');
+});
 
 resetStatsBtnEl.addEventListener('click', () => {
   resetRollCounts();
