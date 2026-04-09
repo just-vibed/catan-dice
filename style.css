@@ -296,12 +296,25 @@ header {
   -webkit-overflow-scrolling: touch;
 }
 
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
 #history-panel h2 {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--hint-color);
-  margin-bottom: 8px;
+}
+
+#roll-counter {
+  font-size: 0.65rem;
+  color: var(--hint-color);
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 #history-list {
@@ -496,14 +509,6 @@ header {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--hint-color);
-}
-
-#roll-counter {
-  font-size: 0.65rem;
-  color: var(--hint-color);
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  margin-left: 6px;
 }
 
 #deck-progress {

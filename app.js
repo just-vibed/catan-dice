@@ -355,9 +355,6 @@ function renderStats() {
   const counts = state.rollCounts;
   const maxCount = Math.max(1, ...Object.values(counts));
 
-  const totalRolls = Object.values(state.rollCounts).reduce((a, b) => a + b, 0);
-  if (rollCounterEl) rollCounterEl.textContent = `${totalRolls} roll${totalRolls !== 1 ? 's' : ''}`;
-
   if (state.fairRoll && deckProgressEl) {
     deckProgressEl.textContent = `Roll ${state.fairDeckPos} / 36`;
   } else if (deckProgressEl) {
@@ -399,6 +396,9 @@ resetStatsBtnEl.addEventListener('click', () => {
 
 // ── History ──────────────────────────────────────────────────────────────────
 function renderHistory() {
+  const totalRolls = Object.values(state.rollCounts).reduce((a, b) => a + b, 0);
+  if (rollCounterEl) rollCounterEl.textContent = `${totalRolls} roll${totalRolls !== 1 ? 's' : ''}`;
+
   historyListEl.innerHTML = state.history.map(entry => {
     const playerBadge = state.playerCount > 1
       ? `<span class="history-player">${getPlayerName(entry.player)}</span>`
