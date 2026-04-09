@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Catan Dice (Python static server)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3000", "--directory", "C:/Users/j/Documents/Claude/catan-dice"],
+      "port": 3000
+    }
+  ]
+}
