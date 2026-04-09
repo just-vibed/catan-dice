@@ -1,8 +1,10 @@
 {
   "name": "Catan Dice Roller",
   "short_name": "Catan Dice",
-  "start_url": "/",
-  "scope": "/",
+  "description": "A dice roller and board generator for Catan",
+  "categories": ["games"],
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0B0D17",
