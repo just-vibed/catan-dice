@@ -45,6 +45,7 @@
     <div id="stats-panel">
       <div class="stats-header">
         <h2>This Game</h2>
+        <span id="deck-progress"></span>
         <button id="reset-stats-btn">Reset</button>
       </div>
       <div id="stats-chart"></div>
@@ -137,6 +138,11 @@
           <select id="voice-select"><option value="">Default</option></select>
           <button id="voice-test-btn">Test</button>
         </div>
+      </div>
+
+      <div class="setting-row" id="fair-roll-row">
+        <label for="fair-roll-toggle">Fair Roll <span class="setting-hint">(2d6 only)</span></label>
+        <input type="checkbox" id="fair-roll-toggle">
       </div>
 
       <button id="install-btn" class="hidden">Install App</button>

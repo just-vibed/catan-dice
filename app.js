@@ -17,6 +17,9 @@ const state = {
   selectedVoice: null,
   muted: false,
   rollCounts: {},
+  fairRoll: false,
+  fairDeck: [],
+  fairDeckPos: 0,
 };
 
 let isRolling = false;
@@ -59,6 +62,9 @@ const announceNameToggleEl = document.getElementById('announce-name-toggle');
 const announceNameRowEl    = document.getElementById('announce-name-row');
 const voiceSelectEl        = document.getElementById('voice-select');
 const voiceTestBtnEl       = document.getElementById('voice-test-btn');
+const fairRollToggleEl     = document.getElementById('fair-roll-toggle');
+const fairRollRowEl        = document.getElementById('fair-roll-row');
+const deckProgressEl       = document.getElementById('deck-progress');
 
 // ── Player name helpers ──────────────────────────────────────────────────────
 function getPlayerName(n) {
@@ -107,6 +113,30 @@ function renderNameInputs() {
   }
 }
 
+// ── Fair deck ────────────────────────────────────────────────────────────────
+function buildFairDeck() {
+  const deck = [];
+  for (let a = 1; a <= 6; a++)
+    for (let b = 1; b <= 6; b++)
+      deck.push([a, b]);
+  // Fisher-Yates shuffle
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  state.fairDeck = deck;
+  state.fairDeckPos = 0;
+}
+
+function updateFairRollVisibility() {
+  const eligible = state.diceCount === 2 && state.dieSides === 6;
+  fairRollRowEl.style.display = eligible ? 'flex' : 'none';
+  if (!eligible && state.fairRoll) {
+    state.fairRoll = false;
+    fairRollToggleEl.checked = false;
+  }
+}
+
 // ── Dice helpers ────────────────────────────────────────────────────────────
 function randDie() {
   return Math.ceil(Math.random() * state.dieSides);
@@ -127,6 +157,7 @@ function resetRollCounts() {
   for (let i = state.diceCount; i <= state.diceCount * state.dieSides; i++) {
     state.rollCounts[i] = 0;
   }
+  if (state.fairRoll) buildFairDeck();
 }
 
 function renderDiceElements() {
@@ -170,7 +201,13 @@ function roll() {
     tapHintEl.classList.add('hidden');
   }
 
-  const rolls = Array.from({ length: state.diceCount }, () => randDie());
+  let rolls;
+  if (state.fairRoll && state.diceCount === 2 && state.dieSides === 6) {
+    if (state.fairDeckPos >= state.fairDeck.length) buildFairDeck();
+    rolls = state.fairDeck[state.fairDeckPos++];
+  } else {
+    rolls = Array.from({ length: state.diceCount }, () => randDie());
+  }
   const sum = rolls.reduce((a, b) => a + b, 0);
   const isRobber = sum === 7;
 
@@ -317,6 +354,12 @@ function renderStats() {
   const counts = state.rollCounts;
   const maxCount = Math.max(1, ...Object.values(counts));
 
+  if (state.fairRoll && deckProgressEl) {
+    deckProgressEl.textContent = `Roll ${state.fairDeckPos} / 36`;
+  } else if (deckProgressEl) {
+    deckProgressEl.textContent = '';
+  }
+
   statsChartEl.innerHTML = Array.from({ length: range }, (_, i) => {
     const n = min + i;
     const count = counts[n] || 0;
@@ -434,6 +477,7 @@ diceCountEl.addEventListener('change', () => {
   resetRollCounts();
   state.history = [];
   renderDiceElements();
+  updateFairRollVisibility();
   renderStats();
   renderHistory();
 });
@@ -443,8 +487,15 @@ dieSidesEl.addEventListener('change', () => {
   resetRollCounts();
   state.history = [];
   renderDiceElements();
+  updateFairRollVisibility();
   renderStats();
   renderHistory();
+});
+
+fairRollToggleEl.addEventListener('change', () => {
+  state.fairRoll = fairRollToggleEl.checked;
+  if (state.fairRoll) buildFairDeck();
+  renderStats();
 });
 
 playerCountEl.addEventListener('change', () => {
@@ -569,6 +620,7 @@ pauseRowEl.style.display = 'none';
 renderNameInputs();
 resetRollCounts();
 renderDiceElements();
+updateFairRollVisibility();
 renderStats();
 
 if ('speechSynthesis' in window) {
