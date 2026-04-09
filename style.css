@@ -498,6 +498,14 @@ header {
   color: var(--hint-color);
 }
 
+#roll-counter {
+  font-size: 0.65rem;
+  color: var(--hint-color);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+}
+
 #deck-progress {
   font-size: 0.65rem;
   color: var(--accent);

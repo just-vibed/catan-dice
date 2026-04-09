@@ -65,6 +65,7 @@ const voiceTestBtnEl       = document.getElementById('voice-test-btn');
 const fairRollToggleEl     = document.getElementById('fair-roll-toggle');
 const fairRollRowEl        = document.getElementById('fair-roll-row');
 const deckProgressEl       = document.getElementById('deck-progress');
+const rollCounterEl        = document.getElementById('roll-counter');
 
 // ── Player name helpers ──────────────────────────────────────────────────────
 function getPlayerName(n) {
@@ -353,6 +354,9 @@ function renderStats() {
 
   const counts = state.rollCounts;
   const maxCount = Math.max(1, ...Object.values(counts));
+
+  const totalRolls = Object.values(state.rollCounts).reduce((a, b) => a + b, 0);
+  if (rollCounterEl) rollCounterEl.textContent = `${totalRolls} roll${totalRolls !== 1 ? 's' : ''}`;
 
   if (state.fairRoll && deckProgressEl) {
     deckProgressEl.textContent = `Roll ${state.fairDeckPos} / 36`;
